@@ -1,363 +1,1321 @@
-// ---------- Profile and live-class schedule ----------
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#122a43">
+<meta name="description" content="HINOVAIQ learning and career workspace">
+<title>HINOVAIQ Learning Workspace</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23122a43'/%3E%3Ctext x='7' y='24' fill='white' font-size='24' font-family='Arial'%3EH%3C/text%3E%3C/svg%3E">
 
-const LEARNING_SETTINGS_KEY = "hinovaiq-learning-settings-v1";
+<style>
+:root {
+  --navy: #122a43;
+  --blue: #215bce;
+  --teal: #76e0ce;
+  --ink: #182c42;
+  --muted: #53657a;
+  --bg: #f2f5fa;
+  --line: #d9e2ed;
+  --red: #aa293d;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 16px/1.6 system-ui, -apple-system, sans-serif;
+}
+h1, h2, h3, p { margin-top: 0; }
+h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); line-height: 1.2; }
+h2 { font-size: 1.35rem; }
+h3 { font-size: 1.1rem; }
+a { color: var(--blue); }
+button, input, textarea, select { font: inherit; }
+button, .button {
+  display: inline-block;
+  padding: .7rem 1rem;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: var(--blue);
+  color: white;
+  font-weight: 650;
+  text-decoration: none;
+  cursor: pointer;
+}
+button:hover, .button:hover { filter: brightness(.93); }
+button:disabled { opacity: .55; cursor: not-allowed; }
+.secondary {
+  background: white;
+  border-color: var(--line);
+  color: var(--ink);
+}
+.danger { background: var(--red); }
+:focus-visible { outline: 3px solid #d28400; outline-offset: 3px; }
+input, textarea, select {
+  width: 100%;
+  padding: .8rem;
+  border: 1px solid #9cadc0;
+  border-radius: 8px;
+  background: white;
+  color: var(--ink);
+}
+textarea { min-height: 170px; resize: vertical; }
+label { display: block; font-weight: 650; margin-bottom: .35rem; }
+.field { margin-bottom: 1rem; }
+.muted { color: var(--muted); }
+.small { font-size: .875rem; }
+.brand { font-size: 1.4rem; font-weight: 850; letter-spacing: .05em; }
+.brand span { color: var(--teal); }
+.card {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 1.4rem;
+  min-width: 0;
+}
+.card h2, .card h3 { overflow-wrap: anywhere; }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 270px), 1fr));
+  gap: 1rem;
+}
+.actions { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
+.section { margin-bottom: 1.5rem; }
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+.section-heading h2 { margin: 0; }
+.badge {
+  display: inline-block;
+  padding: .2rem .65rem;
+  margin-bottom: .75rem;
+  border-radius: 20px;
+  background: #eaf0fc;
+  color: #264d96;
+  font-size: .875rem;
+}
+.empty { padding: 2rem; text-align: center; color: var(--muted); }
+.note { white-space: pre-wrap; overflow-wrap: anywhere; }
+.stat { font-size: 2rem; font-weight: 750; margin: 0; }
+progress { width: 100%; height: 12px; accent-color: var(--blue); }
+#login {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #122a43, #25577e);
+}
+.login-card { width: min(100%, 470px); padding: 2rem; }
+.login-card .brand { margin-bottom: 1.5rem; }
+.login-card .brand span { color: #08796c; }
+#login-error { color: var(--red); min-height: 1.5rem; }
+#app { min-height: 100vh; display: grid; grid-template-columns: 235px 1fr; }
+aside { padding: 1.5rem 1rem; background: var(--navy); color: white; }
+aside .brand { padding: .5rem; margin-bottom: 1.7rem; }
+nav { display: grid; gap: .4rem; }
+nav a {
+  display: block;
+  padding: .85rem;
+  border-radius: 8px;
+  color: #dce7f5;
+  text-decoration: none;
+}
+nav a:hover, nav a[aria-current="page"] { background: #2d4660; color: white; }
+.workspace { min-width: 0; }
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: .8rem;
+  padding: 1rem 2rem;
+  background: white;
+  border-bottom: 1px solid var(--line);
+}
+main { max-width: 1280px; margin: auto; padding: 2rem; }
+.welcome { background: var(--navy); color: white; border: 0; }
+.welcome p { color: #d6e3f0; }
+.welcome .eyebrow {
+  color: var(--teal);
+  font-size: .875rem;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  font-weight: 700;
+}
+.search { max-width: 580px; margin-bottom: 1.5rem; }
+dialog {
+  width: min(680px, calc(100% - 2rem));
+  max-height: 88vh;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 1.5rem;
+  color: var(--ink);
+}
+dialog::backdrop { background: rgb(10 25 45 / 65%); }
+.dialog-top { display: flex; justify-content: space-between; gap: 1rem; }
+.lesson { padding: 1.1rem 0; border-top: 1px solid var(--line); }
+#notice {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  z-index: 30;
+  max-width: min(440px, calc(100% - 2rem));
+  padding: 1rem;
+  color: white;
+  background: var(--navy);
+  border-radius: 10px;
+  box-shadow: 0 8px 30px #0003;
+}
+.skip { position: absolute; top: -100px; left: 1rem; z-index: 40; }
+.skip:focus { top: 1rem; background: white; padding: 1rem; }
+@media (max-width: 780px) {
+  #app { grid-template-columns: 1fr; }
+  aside { padding: 1rem; }
+  aside .brand { margin-bottom: .8rem; }
+  nav { grid-template-columns: repeat(3, 1fr); }
+  nav a { text-align: center; padding: .6rem .3rem; font-size: .875rem; }
+  header, main { padding: 1rem; }
+}
+@media (max-width: 380px) {
+  nav { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
 
-let profile = { name: "" };
-let liveClasses = [];
+<body>
+<section id="login">
+  <form id="login-form" class="card login-card">
+    <div class="brand">HINOVA<span>IQ</span></div>
+    <h1>Your next chapter starts here.</h1>
+    <p class="muted">Learn, build, and grow your career.</p>
 
-try {
-  const saved = JSON.parse(
-    localStorage.getItem(LEARNING_SETTINGS_KEY) || "null"
-  );
+    <div class="field">
+      <label for="name">Your name</label>
+      <input id="name" autocomplete="given-name" maxlength="60" required>
+    </div>
+    <div class="field">
+      <label for="email">Email</label>
+      <input id="email" type="email" autocomplete="username" required>
+    </div>
+    <div class="field">
+      <label for="password">Password</label>
+      <input id="password" type="password" autocomplete="current-password" required>
+    </div>
 
-  if (saved && typeof saved === "object") {
-    if (typeof saved.name === "string") {
-      profile.name = saved.name.slice(0, 60);
-    }
+    <button id="login-button" type="submit" style="width:100%" disabled>
+      Loading workspace…
+    </button>
+    <p id="login-error" role="alert"></p>
 
-    if (Array.isArray(saved.classes)) {
-      liveClasses = saved.classes.filter(session =>
-        session &&
-        typeof session.id === "string" &&
-        typeof session.title === "string" &&
-        typeof session.courseId === "string" &&
-        Number.isFinite(Date.parse(session.startsAt)) &&
-        Number.isFinite(session.duration) &&
-        session.duration >= 15 &&
-        session.duration <= 480 &&
-        validZoomURL(session.zoomURL)
-      );
-    }
+    <p class="small muted">
+      Demo: <strong>demo@hinovaiq.com</strong><br>
+      Password: <strong>Hinovaiq123!</strong><br>
+      Demo access only. Workspace data stays in this browser.
+    </p>
+  </form>
+</section>
+
+<div id="app" hidden>
+  <a class="skip" href="#main">Skip to content</a>
+  <aside>
+    <div class="brand">HINOVA<span>IQ</span></div>
+    <nav aria-label="Main navigation">
+      <a href="#home">🏠 Home</a>
+      <a href="#courses">🧠 Courses</a>
+      <a href="#notes">📝 Notes</a>
+      <a href="#library">🚀 Library</a>
+      <a href="#career">💼 Career</a>
+      <a href="#bookmarks">🔖 Bookmarks</a>
+    </nav>
+  </aside>
+
+  <div class="workspace">
+    <header>
+      <div>
+        <strong>Learning workspace</strong>
+        <span class="small muted"> · Browser-local demo</span>
+      </div>
+      <div class="actions">
+        <span id="user-label"></span>
+        <button id="logout" class="secondary">Log out</button>
+      </div>
+    </header>
+    <main id="main" tabindex="-1"></main>
+  </div>
+</div>
+
+<dialog id="modal" aria-labelledby="modal-title">
+  <div class="dialog-top">
+    <h2 id="modal-title"></h2>
+    <button id="close-modal" class="secondary" aria-label="Close dialog">✕</button>
+  </div>
+  <div id="modal-body"></div>
+</dialog>
+
+<div id="notice" role="status" hidden></div>
+
+<script>
+"use strict";
+
+// Demo credentials are public. This is not production authentication.
+const DEMO_EMAIL = "demo@hinovaiq.com";
+const DEMO_PASSWORD = "Hinovaiq123!";
+const STATE_KEY = "hinovaiq-complete-v1";
+const SESSION_KEY = "hinovaiq-complete-session";
+const MAX_FILE_SIZE = 20 * 1024 * 1024;
+const PAGES = ["home", "courses", "notes", "library", "career", "bookmarks"];
+
+const courses = [
+  {
+    id: "applied-ai",
+    title: "Applied AI",
+    category: "AI",
+    description: "Build practical AI workflows and grounded applications.",
+    lessons: [
+      ["AI application foundations",
+       "Begin with a specific user task. Define inputs, expected outputs, and success criteria. Identify where AI adds value and where deterministic rules are more appropriate."],
+      ["Prompting and structured output",
+       "Provide clear instructions, relevant context, and examples. Define the desired output structure. Validate model output before using it in application logic."],
+      ["Retrieval-Augmented Generation",
+       "RAG retrieves relevant information and includes it in the model’s context. It does not permanently train the model on your documents. Check both retrieval quality and whether generated answers are supported by the evidence."],
+      ["Evaluation and deployment",
+       "Test representative tasks, missing evidence, and adversarial inputs. Track quality, latency, and cost. Keep API secrets on the backend and enforce authorization before performing protected actions."]
+    ]
+  },
+  {
+    id: "application-development",
+    title: "Application Development",
+    category: "Development",
+    description: "Design application flows, APIs, data models, and releases.",
+    lessons: [
+      ["Requirements and architecture",
+       "Describe users, their tasks, and required data. Separate interface concerns from business logic and storage. Include failure states and accessibility in the design."],
+      ["APIs and databases",
+       "APIs connect application components. Validate requests on the server and handle failures. Use database relationships and constraints to preserve data integrity."],
+      ["Identity and permissions",
+       "Authentication establishes identity. Authorization determines permitted actions. Enforce access rules on the backend for every protected request."],
+      ["Testing and releases",
+       "Test core user journeys and error conditions. Use version control and repeatable deployments. Monitor production behavior and prepare recovery procedures."]
+    ]
+  },
+  {
+    id: "website-development",
+    title: "Website Development",
+    category: "Web",
+    description: "Build accessible, responsive websites with HTML, CSS, and JavaScript.",
+    lessons: [
+      ["Semantic HTML",
+       "Use headings in logical order, links for navigation, and buttons for actions. Associate inputs with labels. Semantic HTML improves accessibility and maintainability."],
+      ["Responsive CSS",
+       "Use flexible layouts with Grid or Flexbox. Maintain readable text and visible keyboard focus. Check small screens and enlarged text for clipping or inaccessible controls."],
+      ["JavaScript interactions",
+       "Respond to user events and organize application state. Validate input and handle network errors. Insert untrusted text safely instead of interpreting it as HTML."],
+      ["Hosting and maintenance",
+       "Static hosting serves HTML, CSS, JavaScript, and assets. Backend operations require additional services. Verify navigation, relative asset paths, accessibility, and performance before publishing."]
+    ]
+  },
+  {
+    id: "cloud-windows",
+    title: "Cloud / Windows Administrator",
+    category: "Infrastructure",
+    description: "Learn AWS, Azure, Windows Server, and operational foundations.",
+    lessons: [
+      ["Cloud infrastructure",
+       "Cloud platforms provide compute, storage, and networking. Understand regions, availability zones, virtual networks, and shared responsibility. Plan for cost, reliability, and recovery."],
+      ["AWS administration",
+       "Explore EC2 virtual servers, S3 object storage, and IAM access controls. Grant least privilege, prefer temporary credentials, and establish monitoring and backup procedures."],
+      ["Azure administration",
+       "Organize resources using subscriptions and resource groups. Explore virtual machines, virtual networks, storage, and role-based access control. Use managed identities where supported."],
+      ["Windows Server foundations",
+       "Learn server roles, services, event logs, local users, and file permissions. Practice in an isolated lab. Document configuration changes and recovery steps."],
+      ["Directory and network services",
+       "Active Directory Domain Services manages domain identities and computers. Group Policy manages settings. DNS resolves names, while DHCP assigns network configuration."],
+      ["PowerShell and operations",
+       "Use PowerShell for repeatable administrative tasks. Review scripts before execution and limit privileges. Combine patching, monitoring, backups, and recovery testing into routine operations."]
+    ]
   }
-} catch {
-  notify("Your profile or class schedule could not be loaded.");
-}
+];
 
-if ($("#display-name")) {
-  $("#display-name").value = profile.name;
-}
-
-function saveLearningSettings() {
-  try {
-    localStorage.setItem(LEARNING_SETTINGS_KEY, JSON.stringify({
-      name: profile.name,
-      classes: liveClasses
-    }));
-    return true;
-  } catch {
-    notify("Changes could not be saved to this browser.");
-    return false;
+const resources = [
+  {
+    id: "rag-checklist",
+    title: "RAG Evaluation Checklist",
+    category: "Applied AI",
+    text: "1. Define representative questions.\n2. Identify expected supporting sources.\n3. Check retrieval relevance.\n4. Check answer support and citation accuracy.\n5. Test missing or conflicting evidence.\n6. Measure latency and cost."
+  },
+  {
+    id: "app-planning",
+    title: "Application Planning Template",
+    category: "Application Development",
+    text: "Users and goals\nWho uses the application? What task must they complete?\n\nCore flow\nList the steps from entry to successful completion.\n\nData and access\nDefine records, relationships, and permissions.\n\nValidation\nDescribe success criteria and important failure cases."
+  },
+  {
+    id: "web-checklist",
+    title: "Website Launch Checklist",
+    category: "Website Development",
+    text: "Check keyboard navigation and visible focus.\nVerify form labels and error messages.\nTest mobile layouts and enlarged text.\nCheck links and asset paths.\nOptimize large assets.\nConfirm no secrets are exposed in frontend code."
+  },
+  {
+    id: "admin-checklist",
+    title: "Administrator Operations Checklist",
+    category: "Cloud / Windows",
+    text: "Review access permissions.\nCheck system health and alerts.\nReview patch status.\nVerify backup completion.\nTest recovery procedures.\nDocument changes.\nReview cloud usage and costs."
   }
+];
+
+const jobs = [
+  {
+    id: "ai-builder",
+    title: "AI Application Developer",
+    company: "Example AI Studio",
+    location: "Remote",
+    type: "Full-time",
+    text: "Illustrative role: build AI workflows, integrate APIs, and evaluate model outputs.",
+    skills: "Application development, APIs, RAG, evaluation"
+  },
+  {
+    id: "web-developer",
+    title: "Web Developer",
+    company: "Example Digital Team",
+    location: "Hybrid",
+    type: "Full-time",
+    text: "Illustrative role: build accessible interfaces and integrate application services.",
+    skills: "HTML, CSS, JavaScript, accessibility"
+  },
+  {
+    id: "cloud-admin",
+    title: "Cloud / Windows Administrator",
+    company: "Example Infrastructure Team",
+    location: "On-site",
+    type: "Full-time",
+    text: "Illustrative role: maintain Windows environments and support cloud infrastructure.",
+    skills: "Windows Server, PowerShell, networking, AWS or Azure"
+  }
+];
+
+const $ = selector => document.querySelector(selector);
+const esc = value => String(value).replace(/[&<>"']/g, char => ({
+  "&": "&amp;", "<": "&lt;", ">": "&gt;",
+  '"': "&quot;", "'": "&#39;"
+}[char]));
+
+let state = {
+  name: "",
+  completed: [],
+  notes: [],
+  bookmarks: [],
+  links: [],
+  classes: []
+};
+
+let signedIn = false;
+let db = null;
+let files = [];
+let noticeTimer;
+let uploading = false;
+
+function notify(message) {
+  $("#notice").textContent = message;
+  $("#notice").hidden = false;
+  clearTimeout(noticeTimer);
+  noticeTimer = setTimeout(() => $("#notice").hidden = true, 6500);
 }
 
-// Accept HTTPS meeting URLs on zoom.us or its subdomains.
-// Reject unrelated domains and URLs containing embedded credentials.
-function validZoomURL(value) {
+function safeURL(value) {
   try {
-    const url = new URL(value);
-    const host = url.hostname.toLowerCase();
-
-    const zoomHost =
-      host === "zoom.us" || host.endsWith(".zoom.us");
-
-    const meetingPath =
-      /^\/(?:j\/\d+|my\/[^/]+)\/?$/.test(url.pathname);
-
-    if (
-      url.protocol !== "https:" ||
-      !zoomHost ||
-      !meetingPath ||
-      url.username ||
-      url.password ||
-      url.port
-    ) {
-      return null;
-    }
-
-    return url.href;
+    const url = new URL(String(value));
+    return ["http:", "https:"].includes(url.protocol) &&
+      !url.username && !url.password ? url.href : null;
   } catch {
     return null;
   }
 }
 
-function classStatus(session) {
-  const now = Date.now();
-  const start = Date.parse(session.startsAt);
-  const end = start + session.duration * 60000;
+function zoomURL(value) {
+  const valid = safeURL(value);
+  if (!valid) return null;
+  const url = new URL(valid);
+  const host = url.hostname.toLowerCase();
 
-  if (now >= end) return "Past";
-  if (now >= start) return "Scheduled now";
-  return "Upcoming";
+  return url.protocol === "https:" &&
+    !url.port &&
+    (host === "zoom.us" || host.endsWith(".zoom.us")) &&
+    /^\/(?:j\/\d+|my\/[^/]+)\/?$/.test(url.pathname)
+      ? url.href : null;
 }
 
-function formatClassTime(value) {
-  return new Intl.DateTimeFormat(undefined, {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-    timeZoneName: "short"
-  }).format(new Date(value));
+function loadState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STATE_KEY) || "null");
+    if (!saved || typeof saved !== "object") return;
+
+    const array = key => Array.isArray(saved[key]) ? saved[key] : [];
+    state.name = typeof saved.name === "string" ? saved.name.slice(0, 60) : "";
+
+    const lessonKeys = new Set(courses.flatMap(course =>
+      course.lessons.map((_, i) => `${course.id}:${i}`)
+    ));
+    state.completed = [...new Set(array("completed"))]
+      .filter(key => lessonKeys.has(key));
+
+    state.bookmarks = [...new Set(array("bookmarks"))]
+      .filter(key => typeof key === "string");
+
+    state.notes = array("notes").filter(note =>
+      note && typeof note.id === "string" &&
+      typeof note.title === "string" && typeof note.body === "string"
+    );
+
+    state.links = array("links").filter(link =>
+      link && typeof link.id === "string" &&
+      typeof link.title === "string" && safeURL(link.url)
+    );
+
+    state.classes = array("classes").filter(item =>
+      item && typeof item.id === "string" &&
+      typeof item.title === "string" &&
+      courses.some(course => course.id === item.courseId) &&
+      Number.isFinite(Date.parse(item.start)) &&
+      Number.isInteger(item.duration) &&
+      item.duration >= 15 && item.duration <= 480 &&
+      zoomURL(item.url)
+    );
+  } catch {
+    notify("Saved workspace settings could not be loaded.");
+  }
 }
 
-function liveClassCard(session) {
-  const course = courses.find(c => c.id === session.courseId);
-  const status = classStatus(session);
-  const zoomURL = validZoomURL(session.zoomURL);
+function saveState() {
+  try {
+    localStorage.setItem(STATE_KEY, JSON.stringify(state));
+    return true;
+  } catch {
+    notify("Settings could not be saved. These changes may be lost on reload.");
+    return false;
+  }
+}
 
-  return `
-    <article class="card">
-      <span class="badge">${status}</span>
+function uid() { return crypto.randomUUID(); }
 
-      <h3>${escapeHTML(session.title)}</h3>
+function fileSize(bytes) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1048576) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / 1048576).toFixed(1)} MB`;
+}
 
-      <p class="muted">
-        ${escapeHTML(course?.title || "Learning session")}
-      </p>
+// Actual file contents are stored in IndexedDB.
+function openDatabase() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open("hinovaiq-complete-files", 1);
 
-      <p>
-        <time datetime="${escapeHTML(session.startsAt)}">
-          ${escapeHTML(formatClassTime(session.startsAt))}
-        </time>
-      </p>
+    request.onupgradeneeded = () => {
+      request.result.createObjectStore("files", { keyPath: "id" });
+    };
+    request.onsuccess = () => {
+      const database = request.result;
+      database.onversionchange = () => database.close();
+      resolve(database);
+    };
+    request.onerror = () => reject(request.error);
+    request.onblocked = () => {
+      notify("Close other HINOVAIQ tabs to finish opening file storage.");
+    };
+  });
+}
 
-      <p class="small muted">
-        ${session.duration} minutes
-      </p>
+function fileOperation(mode, callback) {
+  return new Promise((resolve, reject) => {
+    if (!db) return reject(new Error("File storage unavailable"));
 
-      <div class="actions">
-        ${status !== "Past" && zoomURL ? `
-          <a class="button"
-            href="${escapeHTML(zoomURL)}"
-            target="_blank"
-            rel="noopener noreferrer">
-            Join on Zoom ↗
-          </a>
-        ` : ""}
+    const tx = db.transaction("files", mode);
+    let result;
 
-        <button
-          class="danger"
-          data-action="remove-class"
-          data-id="${escapeHTML(session.id)}">
-          Remove
-        </button>
+    try {
+      const request = callback(tx.objectStore("files"));
+      request.onsuccess = () => result = request.result;
+    } catch (error) {
+      tx.abort();
+      reject(error);
+      return;
+    }
+
+    tx.oncomplete = () => resolve(result);
+    tx.onerror = () => reject(tx.error);
+    tx.onabort = () => reject(tx.error || new Error("Operation interrupted"));
+  });
+}
+
+function refreshFiles() {
+  return new Promise((resolve, reject) => {
+    if (!db) return reject(new Error("File storage unavailable"));
+
+    const tx = db.transaction("files", "readonly");
+    const request = tx.objectStore("files").openCursor();
+    const metadata = [];
+
+    request.onsuccess = () => {
+      const cursor = request.result;
+      if (!cursor) return;
+      const { blob, ...record } = cursor.value;
+      metadata.push(record);
+      cursor.continue();
+    };
+
+    tx.oncomplete = () => {
+      files = metadata.sort((a, b) => b.created - a.created);
+      resolve();
+    };
+    tx.onerror = () => reject(tx.error);
+    tx.onabort = () => reject(tx.error);
+  });
+}
+
+// Hash routing works on GitHub Pages without server routing rules.
+function route() {
+  const [page, query = ""] = location.hash.slice(1).split("?");
+  return {
+    page: PAGES.includes(page) ? page : "home",
+    item: new URLSearchParams(query).get("item")
+  };
+}
+
+function itemHref(page, id) {
+  return `#${page}?item=${encodeURIComponent(id)}`;
+}
+
+function heading(title, subtitle) {
+  return `<div class="section"><h1>${esc(title)}</h1>
+    <p class="muted">${esc(subtitle)}</p></div>`;
+}
+
+function empty(text) {
+  return `<div class="card empty">${esc(text)}</div>`;
+}
+
+function completedCount(course) {
+  return course.lessons.filter((_, index) =>
+    state.completed.includes(`${course.id}:${index}`)
+  ).length;
+}
+
+function savedButton(kind, id) {
+  const saved = state.bookmarks.includes(`${kind}:${id}`);
+  return `<button class="secondary" data-action="bookmark"
+    data-kind="${kind}" data-id="${esc(id)}" aria-pressed="${saved}">
+    ${saved ? "🔖 Saved" : "🔖 Save"}</button>`;
+}
+
+function courseCard(course) {
+  const count = completedCount(course);
+  return `<article class="card">
+    <span class="badge">${esc(course.category)}</span>
+    <h2>${esc(course.title)}</h2>
+    <p class="muted">${esc(course.description)}</p>
+    <progress data-course="${esc(course.id)}" value="${count}"
+      max="${course.lessons.length}" aria-label="${esc(course.title)} progress"></progress>
+    <p class="small muted">${count} / ${course.lessons.length} lessons complete</p>
+    <div class="actions">
+      <a class="button" href="${itemHref("courses", course.id)}">
+        ${count ? "Continue course" : "Start course"}</a>
+      ${savedButton("course", course.id)}
+    </div>
+  </article>`;
+}
+
+function resourceCard(resource) {
+  return `<article class="card">
+    <span class="badge">${esc(resource.category)}</span>
+    <h2>${esc(resource.title)}</h2>
+    <div class="actions">
+      <a class="button" href="${itemHref("library", resource.id)}">Read resource</a>
+      ${savedButton("resource", resource.id)}
+    </div>
+  </article>`;
+}
+
+function jobCard(job) {
+  return `<article class="card">
+    <span class="badge">Sample listing · ${esc(job.type)}</span>
+    <h2>${esc(job.title)}</h2>
+    <p class="muted">${esc(job.company)} · ${esc(job.location)}</p>
+    <div class="actions">
+      <a class="button" href="${itemHref("career", job.id)}">View details</a>
+      ${savedButton("job", job.id)}
+    </div>
+  </article>`;
+}
+
+function fileCard(file) {
+  return `<article class="card">
+    <span class="badge">Uploaded resource</span>
+    <h2>${esc(file.name)}</h2>
+    <p class="small muted">${fileSize(file.size)} ·
+      ${new Date(file.created).toLocaleDateString()}</p>
+    <div class="actions">
+      <button data-action="download" data-id="${esc(file.id)}">Download</button>
+      ${savedButton("file", file.id)}
+      <button class="danger" data-action="delete"
+        data-kind="file" data-id="${esc(file.id)}">Delete</button>
+    </div>
+  </article>`;
+}
+
+function linkCard(link) {
+  const url = safeURL(link.url);
+  if (!url) return "";
+  return `<article class="card">
+    <span class="badge">Website bookmark</span>
+    <h2>${esc(link.title)}</h2>
+    <p class="small muted" style="overflow-wrap:anywhere">
+      ${esc(new URL(url).hostname)}</p>
+    <div class="actions">
+      <a class="button" href="${esc(url)}" target="_blank"
+        rel="noopener noreferrer">Visit website ↗</a>
+      <button class="secondary" data-action="edit-link"
+        data-id="${esc(link.id)}">Edit</button>
+      <button class="danger" data-action="delete"
+        data-kind="link" data-id="${esc(link.id)}">Remove</button>
+    </div>
+  </article>`;
+}
+
+function uploadPanel() {
+  return `<section class="card section">
+    <h2>Upload learning resources</h2>
+    <p class="small muted">
+      Documents, presentations, images, and code files.
+      Maximum 20 MB per file. Stored in this browser.
+    </p>
+    <form id="upload-form">
+      <div class="field">
+        <label for="upload-input">Choose files</label>
+        <input id="upload-input" type="file" multiple required
+          ${!db || uploading ? "disabled" : ""}>
       </div>
-    </article>`;
+      <button type="submit" ${!db || uploading ? "disabled" : ""}>
+        ${uploading ? "Uploading…" : "Upload to library"}
+      </button>
+      <p id="upload-status" class="small muted" role="status"></p>
+    </form>
+    ${db ? "" : '<p class="small">File storage is unavailable.</p>'}
+  </section>`;
 }
 
-function renderLiveClasses() {
-  const container = $("#live-class-list");
-  if (!container) return;
+function classStatus(item) {
+  const start = Date.parse(item.start);
+  if (Date.now() >= start + item.duration * 60000) return "Past";
+  return Date.now() >= start ? "Scheduled now" : "Upcoming";
+}
 
-  const ordered = [...liveClasses].sort((a, b) => {
+function classCard(item) {
+  const status = classStatus(item);
+  const course = courses.find(c => c.id === item.courseId);
+  const date = new Intl.DateTimeFormat(undefined, {
+    dateStyle: "medium", timeStyle: "short"
+  }).format(new Date(item.start));
+
+  return `<article class="card">
+    <span class="badge">${status}</span>
+    <h3>${esc(item.title)}</h3>
+    <p class="muted">${esc(course?.title || "Learning session")}</p>
+    <p><time datetime="${esc(item.start)}">${esc(date)}</time></p>
+    <p class="small muted">${item.duration} minutes</p>
+    <div class="actions">
+      ${status === "Past" ? "" : `
+        <a class="button" href="${esc(zoomURL(item.url))}" target="_blank"
+          rel="noopener noreferrer">Join on Zoom ↗</a>`}
+      <button class="danger" data-action="delete"
+        data-kind="class" data-id="${esc(item.id)}">Remove</button>
+    </div>
+  </article>`;
+}
+
+function renderClasses() {
+  const target = $("#class-list");
+  if (!target) return;
+
+  const ordered = [...state.classes].sort((a, b) => {
     const aPast = classStatus(a) === "Past";
     const bPast = classStatus(b) === "Past";
-
-    // Upcoming/current classes first; most recent past classes last.
     if (aPast !== bPast) return aPast ? 1 : -1;
-
     return aPast
-      ? Date.parse(b.startsAt) - Date.parse(a.startsAt)
-      : Date.parse(a.startsAt) - Date.parse(b.startsAt);
+      ? Date.parse(b.start) - Date.parse(a.start)
+      : Date.parse(a.start) - Date.parse(b.start);
   });
 
-  container.innerHTML = ordered.length
-    ? ordered.map(liveClassCard).join("")
+  target.innerHTML = ordered.length
+    ? ordered.map(classCard).join("")
     : empty("No live classes scheduled yet.");
 }
 
-// Preserve the existing pages and add personalized Home content.
 function render() {
-  renderWorkspace();
+  $("#login").hidden = signedIn;
+  $("#app").hidden = !signedIn;
+  if (!signedIn) return;
 
-  if (!signedIn || currentRoute().page !== "home") return;
+  const { page, item } = route();
+  $("#user-label").textContent = state.name;
+  document.title = `${page[0].toUpperCase() + page.slice(1)} | HINOVAIQ`;
 
-  const welcomeTitle = $("#main .welcome h1");
+  document.querySelectorAll("nav a").forEach(link => {
+    if (link.hash === `#${page}`) link.setAttribute("aria-current", "page");
+    else link.removeAttribute("aria-current");
+  });
 
-  if (welcomeTitle) {
-    welcomeTitle.textContent = profile.name
-      ? `Welcome back, ${profile.name}!`
-      : "Welcome to HINOVAIQ!";
+  if (page === "home") {
+    const total = courses.reduce((sum, c) => sum + c.lessons.length, 0);
+    const done = courses.reduce((sum, c) => sum + completedCount(c), 0);
+
+    $("#main").innerHTML = `
+      <section class="card welcome section">
+        <p class="eyebrow">Your learning workspace</p>
+        <h1>Welcome back, ${esc(state.name || "learner")}!</h1>
+        <p>Build your skills in AI, development, and cloud administration.</p>
+        <a class="button" href="#courses">Explore courses</a>
+      </section>
+
+      <div class="grid section">
+        <div class="card"><p class="muted">Lessons completed</p>
+          <p class="stat">${done} / ${total}</p></div>
+        <div class="card"><p class="muted">Uploaded resources</p>
+          <p class="stat">${files.length}</p></div>
+        <div class="card"><p class="muted">Bookmarks</p>
+          <p class="stat">${state.bookmarks.length + state.links.length}</p></div>
+      </div>
+
+      <section id="classes-section" class="section">
+        <div class="section-heading">
+          <h2>Live classes</h2>
+          <button data-action="new-class">+ Schedule class</button>
+        </div>
+        <p class="small muted">
+          Times use your device timezone:
+          ${esc(Intl.DateTimeFormat().resolvedOptions().timeZone)}.
+          Status follows the timetable, not Zoom meeting activity.
+        </p>
+        <div id="class-list" class="grid"></div>
+      </section>
+
+      ${uploadPanel()}
+
+      <section class="section">
+        <div class="section-heading">
+          <h2>Recent uploads</h2><a href="#library">View library</a>
+        </div>
+        <div class="grid">
+          ${files.length ? files.slice(0, 3).map(fileCard).join("")
+            : empty("Your uploaded resources will appear here.")}
+        </div>
+      </section>
+
+      <h2>Continue learning</h2>
+      <div class="grid">${courses.map(courseCard).join("")}</div>`;
+
+    renderClasses();
   }
 
-  const section = document.createElement("section");
-  section.id = "live-classes";
-  section.style.marginBottom = "1.5rem";
+  if (page === "courses") {
+    $("#main").innerHTML = heading(
+      "Courses", "Four practical learning tracks. Work through lessons at your own pace."
+    ) + `<div class="grid">${courses.map(courseCard).join("")}</div>`;
+  }
 
-  section.innerHTML = `
-    <div class="actions"
-      style="justify-content:space-between;align-items:center;margin-bottom:1rem">
-      <h2 style="margin:0">Live classes</h2>
-      <button data-action="schedule-class">
-        + Schedule a class
-      </button>
-    </div>
+  if (page === "notes") {
+    $("#main").innerHTML = heading("Notes", "Keep your learning notes together.")
+      + `<button class="section" data-action="new-note">+ New note</button>`
+      + (state.notes.length ? `<div class="grid">
+        ${state.notes.map(note => `<article class="card">
+          <h2>${esc(note.title)}</h2><p class="note">${esc(note.body)}</p>
+          <div class="actions">
+            <button class="secondary" data-action="edit-note"
+              data-id="${esc(note.id)}">Edit</button>
+            <button class="danger" data-action="delete"
+              data-kind="note" data-id="${esc(note.id)}">Delete</button>
+          </div></article>`).join("")}</div>`
+        : empty("No notes yet. Create your first note."));
+  }
 
-    <p class="small muted">
-      Times use your device’s timezone.
-      “Scheduled now” reflects the timetable, not Zoom meeting activity.
-    </p>
+  if (["library", "career", "bookmarks"].includes(page)) {
+    const labels = {
+      library: ["Library", "Browse guides and your uploaded resources."],
+      career: ["Career", "Explore sample roles. These are not live vacancies."],
+      bookmarks: ["Bookmarks", "Open saved learning content and useful websites."]
+    };
 
-    <div id="live-class-list" class="grid"></div>
-  `;
+    $("#main").innerHTML = heading(...labels[page])
+      + (page === "library" ? uploadPanel() : "")
+      + (page === "bookmarks"
+        ? '<button class="section" data-action="new-link">+ Add website bookmark</button>'
+        : "")
+      + `<div class="search">
+          <label for="search">Search ${page}</label>
+          <input id="search" type="search" placeholder="Search by title or keyword">
+        </div><div id="results" class="grid"></div>`;
 
-  const welcome = $("#main .welcome");
+    $("#search").addEventListener("input", renderResults);
+    renderResults();
+  }
 
-  if (welcome) welcome.after(section);
-  else $("#main").prepend(section);
+  if ($("#upload-form")) {
+    $("#upload-form").addEventListener("submit", uploadFiles);
+  }
 
-  renderLiveClasses();
+  if (item) openItem(page, item);
 }
 
-function openClassForm() {
+function renderResults() {
+  const page = route().page;
+  const query = $("#search").value.trim().toLowerCase();
+  const entries = [];
+
+  function add(items, renderer) {
+    items.forEach(item => entries.push({ item, renderer }));
+  }
+  function saved(items, kind) {
+    return items.filter(item => state.bookmarks.includes(`${kind}:${item.id}`));
+  }
+
+  if (page === "library") {
+    add(resources, resourceCard);
+    add(files, fileCard);
+  }
+  if (page === "career") add(jobs, jobCard);
+  if (page === "bookmarks") {
+    add(saved(courses, "course"), courseCard);
+    add(saved(resources, "resource"), resourceCard);
+    add(saved(jobs, "job"), jobCard);
+    add(saved(files, "file"), fileCard);
+    add(state.links, linkCard);
+  }
+
+  const matches = entries.filter(({ item }) =>
+    [item.title, item.name, item.category, item.description,
+     item.company, item.location, item.url, item.skills]
+      .filter(Boolean).join(" ").toLowerCase().includes(query)
+  );
+
+  $("#results").innerHTML = matches.length
+    ? matches.map(({ item, renderer }) => renderer(item)).join("")
+    : empty(query ? "No matches. Try another keyword." : "No items yet.");
+}
+
+function openModal(title, html) {
+  $("#modal-title").textContent = title;
+  $("#modal-body").innerHTML = html;
+  if (!$("#modal").open) $("#modal").showModal();
+}
+
+function closeModal() {
+  $("#modal").close();
+  const { page, item } = route();
+  if (item) history.replaceState(null, "", `#${page}`);
+}
+
+function openItem(page, id) {
+  if (page === "courses") {
+    const course = courses.find(c => c.id === id);
+    if (!course) return;
+
+    openModal(course.title, course.lessons.map(([title, text], index) => {
+      const done = state.completed.includes(`${id}:${index}`);
+      return `<section class="lesson">
+        <h3>${index + 1}. ${esc(title)}</h3><p>${esc(text)}</p>
+        <button class="${done ? "secondary" : ""}"
+          data-action="lesson" data-id="${esc(id)}" data-index="${index}"
+          aria-pressed="${done}">
+          ${done ? "✓ Completed — mark incomplete" : "Mark complete"}
+        </button></section>`;
+    }).join(""));
+  }
+
+  if (page === "library") {
+    const resource = resources.find(r => r.id === id);
+    if (resource) openModal(resource.title, `<p class="note">${esc(resource.text)}</p>`);
+  }
+
+  if (page === "career") {
+    const job = jobs.find(j => j.id === id);
+    if (job) openModal(job.title, `
+      <span class="badge">Sample listing</span>
+      <p class="muted">${esc(job.company)} · ${esc(job.location)}</p>
+      <p>${esc(job.text)}</p><h3>Relevant skills</h3><p>${esc(job.skills)}</p>
+      <p class="small muted">This example does not accept applications.</p>`);
+  }
+}
+
+function editNote(id) {
+  const note = state.notes.find(n => n.id === id);
+  openModal(note ? "Edit note" : "New note", `
+    <form id="note-form">
+      <div class="field"><label for="note-title">Title</label>
+        <input id="note-title" required maxlength="120"
+          value="${esc(note?.title || "")}"></div>
+      <div class="field"><label for="note-body">Note</label>
+        <textarea id="note-body" required maxlength="20000">${esc(note?.body || "")}</textarea>
+      </div><button type="submit">Save note</button>
+    </form>`);
+
+  $("#note-form").addEventListener("submit", event => {
+    event.preventDefault();
+    const title = $("#note-title").value.trim();
+    const body = $("#note-body").value.trim();
+    if (!title || !body) return notify("Enter a title and note text.");
+
+    if (note) Object.assign(note, { title, body });
+    else state.notes.unshift({ id: uid(), title, body });
+
+    finishChange("Note saved.");
+  });
+}
+
+function editLink(id) {
+  const link = state.links.find(l => l.id === id);
+  openModal(link ? "Edit bookmark" : "Add website bookmark", `
+    <form id="link-form">
+      <div class="field"><label for="link-title">Title</label>
+        <input id="link-title" required maxlength="120"
+          value="${esc(link?.title || "")}"></div>
+      <div class="field"><label for="link-url">Website URL</label>
+        <input id="link-url" type="url" required placeholder="https://example.com"
+          value="${esc(link?.url || "")}"></div>
+      <button type="submit">Save bookmark</button>
+    </form>`);
+
+  $("#link-form").addEventListener("submit", event => {
+    event.preventDefault();
+    const title = $("#link-title").value.trim();
+    const url = safeURL($("#link-url").value.trim());
+    if (!title || !url) return notify("Enter a title and an HTTP or HTTPS URL.");
+
+    if (link) Object.assign(link, { title, url });
+    else state.links.unshift({ id: uid(), title, url });
+
+    finishChange("Bookmark saved.");
+  });
+}
+
+function scheduleClass() {
   openModal("Schedule a live class", `
     <form id="class-form">
-      <div class="field">
-        <label for="class-title">Class title</label>
-        <input id="class-title"
-          required maxlength="140"
-          placeholder="Applied AI: Building your first RAG workflow">
-      </div>
-
-      <div class="field">
-        <label for="class-course">Course</label>
-        <select id="class-course" required
-          style="width:100%;padding:.8rem;border:1px solid #9eafc2;
-                 border-radius:8px;font:inherit;background:white;color:#172b43">
-          ${courses.map(course => `
-            <option value="${escapeHTML(course.id)}">
-              ${escapeHTML(course.title)}
-            </option>
-          `).join("")}
-        </select>
-      </div>
-
-      <div class="field">
-        <label for="class-start">Date and time</label>
+      <div class="field"><label for="class-title">Class title</label>
+        <input id="class-title" required maxlength="140"></div>
+      <div class="field"><label for="class-course">Course</label>
+        <select id="class-course" required>
+          ${courses.map(c => `<option value="${esc(c.id)}">${esc(c.title)}</option>`).join("")}
+        </select></div>
+      <div class="field"><label for="class-start">Date and time</label>
         <input id="class-start" type="datetime-local" required>
-        <p class="small muted">
-          Enter the time in your device’s local timezone.
-        </p>
-      </div>
-
-      <div class="field">
-        <label for="class-duration">Duration in minutes</label>
-        <input id="class-duration"
-          type="number" min="15" max="480" step="1"
-          value="60" required>
-      </div>
-
-      <div class="field">
-        <label for="class-zoom">Zoom meeting URL</label>
-        <input id="class-zoom"
-          type="url" required
+        <p class="small muted">Use your device’s local timezone.</p></div>
+      <div class="field"><label for="class-duration">Duration in minutes</label>
+        <input id="class-duration" type="number" min="15" max="480"
+          step="1" value="60" required></div>
+      <div class="field"><label for="class-url">Zoom meeting link</label>
+        <input id="class-url" type="url" required
           placeholder="https://yourorganization.zoom.us/j/123456789">
         <p class="small muted">
-          Create the meeting in Zoom, then paste its invitation link here.
-          Include the passcode parameter if Zoom includes one.
-        </p>
-      </div>
-
+          Create the meeting in Zoom, then paste its invitation link.
+          Include its passcode parameter if provided.
+        </p></div>
       <button type="submit">Save class</button>
-    </form>
-  `);
+    </form>`);
 
   $("#class-form").addEventListener("submit", event => {
     event.preventDefault();
-
     const title = $("#class-title").value.trim();
     const courseId = $("#class-course").value;
     const start = new Date($("#class-start").value);
     const duration = Number($("#class-duration").value);
-    const zoomURL = validZoomURL($("#class-zoom").value.trim());
+    const url = zoomURL($("#class-url").value.trim());
 
-    if (!title || !courses.some(course => course.id === courseId)) {
-      notify("Enter a title and select a course.");
-      return;
-    }
-
+    if (!title) return notify("Enter a class title.");
     if (!Number.isFinite(start.getTime()) || start.getTime() <= Date.now()) {
-      notify("Choose a future date and time.");
-      return;
+      return notify("Choose a future date and time.");
     }
-
     if (!Number.isInteger(duration) || duration < 15 || duration > 480) {
-      notify("Duration must be a whole number between 15 and 480 minutes.");
-      return;
+      return notify("Duration must be 15–480 whole minutes.");
     }
+    if (!url) return notify("Enter a valid HTTPS Zoom meeting link on zoom.us.");
 
-    if (!zoomURL) {
-      notify("Enter a valid HTTPS Zoom meeting link on zoom.us.");
-      return;
-    }
-
-    liveClasses.push({
-      id: uid(),
-      title,
-      courseId,
-      startsAt: start.toISOString(),
-      duration,
-      zoomURL
+    state.classes.push({
+      id: uid(), title, courseId,
+      start: start.toISOString(), duration, url
     });
-
-    const saved = saveLearningSettings();
-    closeModal();
-    render();
-
-    if (saved) notify("Live class scheduled in this browser.");
+    finishChange("Class scheduled in this browser.");
   });
 }
 
-document.addEventListener("click", event => {
+function finishChange(message) {
+  const saved = saveState();
+  closeModal();
+  render();
+  if (saved) notify(message);
+}
+
+function confirmDelete(kind, id) {
+  const collections = {
+    file: files, note: state.notes, link: state.links, class: state.classes
+  };
+  const record = collections[kind]?.find(item => item.id === id);
+  if (!record) return;
+
+  openModal("Remove item?", `
+    <p>Remove “${esc(record.title || record.name)}”?</p>
+    <p class="small muted">
+      ${kind === "class"
+        ? "This removes the schedule entry. It does not cancel the Zoom meeting."
+        : "This cannot be undone."}
+    </p>
+    <div class="actions">
+      <button class="secondary" data-action="cancel">Cancel</button>
+      <button class="danger" data-action="confirm-delete"
+        data-kind="${kind}" data-id="${esc(id)}">Remove</button>
+    </div>`);
+}
+
+async function uploadFiles(event) {
+  event.preventDefault();
+  if (uploading || !db) return;
+
+  const selected = [...$("#upload-input").files];
+  if (!selected.length) return;
+
+  if (selected.some(file => file.size > MAX_FILE_SIZE)) {
+    return notify("Each file must be 20 MB or smaller.");
+  }
+
+  uploading = true;
+  const form = event.currentTarget;
+  form.querySelector("button").disabled = true;
+  form.querySelector("input").disabled = true;
+
+  let count = 0;
+  let failed = false;
+
+  try {
+    for (const file of selected) {
+      const status = $("#upload-status");
+      if (status) status.textContent = `Saving ${count + 1} of ${selected.length}…`;
+
+      await fileOperation("readwrite", store => store.add({
+        id: uid(),
+        name: file.name,
+        size: file.size,
+        type: file.type || "application/octet-stream",
+        created: Date.now(),
+        blob: file
+      }));
+      count++;
+    }
+  } catch {
+    failed = true;
+  }
+
+  try { await refreshFiles(); }
+  catch { failed = true; }
+
+  uploading = false;
+
+  if (signedIn && ["home", "library"].includes(route().page)) render();
+
+  notify(failed
+    ? `${count} file(s) saved. Some files could not be saved; storage may be full or unavailable.`
+    : `${count} file(s) uploaded to your library.`);
+}
+
+async function downloadFile(id) {
+  const file = await fileOperation("readonly", store => store.get(id));
+  if (!file) return notify("This file is no longer available.");
+
+  // Download uploaded content instead of executing it in the page.
+  const url = URL.createObjectURL(new Blob(
+    [file.blob], { type: "application/octet-stream" }
+  ));
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = file.name;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 30000);
+}
+
+document.addEventListener("click", async event => {
   const button = event.target.closest("button[data-action]");
   if (!button || !signedIn) return;
 
-  const { action, id } = button.dataset;
+  const { action, id, kind, index } = button.dataset;
 
-  if (action === "schedule-class") {
-    openClassForm();
-  }
+  try {
+    if (action === "bookmark") {
+      const key = `${kind}:${id}`;
+      const exists = state.bookmarks.includes(key);
+      state.bookmarks = exists
+        ? state.bookmarks.filter(value => value !== key)
+        : [...state.bookmarks, key];
 
-  if (action === "remove-class") {
-    openModal("Remove scheduled class?", `
-      <p>
-        This removes the class from this workspace.
-        It does not cancel the meeting in Zoom.
-      </p>
-      <div class="actions">
-        <button class="secondary"
-          data-action="cancel-delete">Keep class</button>
-        <button class="danger"
-          data-action="confirm-remove-class"
-          data-id="${escapeHTML(id)}">Remove class</button>
-      </div>
-    `);
-  }
+      const saved = saveState();
+      if (route().page === "bookmarks") renderResults();
+      else if (route().page === "home") render();
+      else {
+        button.textContent = exists ? "🔖 Save" : "🔖 Saved";
+        button.setAttribute("aria-pressed", String(!exists));
+      }
+      if (saved) notify(exists ? "Bookmark removed." : "Bookmark saved.");
+    }
 
-  if (action === "confirm-remove-class") {
-    liveClasses = liveClasses.filter(session => session.id !== id);
-    const saved = saveLearningSettings();
+    if (action === "lesson") {
+      const key = `${id}:${index}`;
+      const done = state.completed.includes(key);
+      state.completed = done
+        ? state.completed.filter(value => value !== key)
+        : [...state.completed, key];
+      saveState();
 
-    closeModal();
-    render();
+      button.className = done ? "" : "secondary";
+      button.textContent = done ? "Mark complete" : "✓ Completed — mark incomplete";
+      button.setAttribute("aria-pressed", String(!done));
 
-    if (saved) notify("Class removed from this workspace.");
+      const course = courses.find(c => c.id === id);
+      document.querySelectorAll("progress[data-course]").forEach(progress => {
+        if (progress.dataset.course !== id) return;
+        const count = completedCount(course);
+        progress.value = count;
+        progress.nextElementSibling.textContent =
+          `${count} / ${course.lessons.length} lessons complete`;
+      });
+    }
+
+    if (action === "new-note") editNote();
+    if (action === "edit-note") editNote(id);
+    if (action === "new-link") editLink();
+    if (action === "edit-link") editLink(id);
+    if (action === "new-class") scheduleClass();
+    if (action === "cancel") closeModal();
+    if (action === "delete") confirmDelete(kind, id);
+
+    if (action === "download") {
+      button.disabled = true;
+      try { await downloadFile(id); }
+      finally { button.disabled = false; }
+    }
+
+    if (action === "confirm-delete") {
+      button.disabled = true;
+
+      if (kind === "file") {
+        await fileOperation("readwrite", store => store.delete(id));
+        files = files.filter(file => file.id !== id);
+        state.bookmarks = state.bookmarks.filter(key => key !== `file:${id}`);
+      }
+      if (kind === "note") state.notes = state.notes.filter(note => note.id !== id);
+      if (kind === "link") state.links = state.links.filter(link => link.id !== id);
+      if (kind === "class") state.classes = state.classes.filter(item => item.id !== id);
+
+      finishChange("Item removed.");
+    }
+  } catch {
+    button.disabled = false;
+    notify("The action could not be completed. Please try again.");
   }
 });
 
-// Refresh timetable status without interrupting keyboard focus.
-setInterval(() => {
-  const section = $("#live-classes");
+$("#login-form").addEventListener("submit", event => {
+  event.preventDefault();
+  const name = $("#name").value.trim();
 
-  if (
-    signedIn &&
-    currentRoute().page === "home" &&
-    !$("#modal").open &&
-    section &&
-    !section.contains(document.activeElement)
-  ) {
-    renderLiveClasses();
+  if (!name) {
+    $("#login-error").textContent = "Enter your name.";
+    return;
+  }
+  if ($("#email").value.trim().toLowerCase() !== DEMO_EMAIL ||
+      $("#password").value !== DEMO_PASSWORD) {
+    $("#login-error").textContent = "Email or password is incorrect.";
+    return;
+  }
+
+  state.name = name;
+  saveState();
+  signedIn = true;
+
+  try { sessionStorage.setItem(SESSION_KEY, "yes"); } catch {}
+  $("#password").value = "";
+  $("#login-error").textContent = "";
+  render();
+  if (!$("#modal").open) $("#main").focus();
+});
+
+$("#logout").addEventListener("click", () => {
+  signedIn = false;
+  try { sessionStorage.removeItem(SESSION_KEY); } catch {}
+  closeModal();
+  render();
+  $("#name").value = state.name;
+  $("#password").value = "";
+  $("#name").focus();
+});
+
+$("#close-modal").addEventListener("click", closeModal);
+$("#modal").addEventListener("cancel", event => {
+  event.preventDefault();
+  closeModal();
+});
+
+window.addEventListener("hashchange", () => {
+  $("#modal").close();
+  render();
+  if (signedIn && !$("#modal").open) $("#main").focus();
+});
+
+// Update schedule status without disturbing an active control.
+setInterval(() => {
+  const section = $("#classes-section");
+  if (signedIn && route().page === "home" && section &&
+      !$("#modal").open && !section.contains(document.activeElement)) {
+    renderClasses();
   }
 }, 30000);
+
+async function initialize() {
+  loadState();
+  $("#name").value = state.name;
+
+  try {
+    signedIn = sessionStorage.getItem(SESSION_KEY) === "yes";
+  } catch {}
+
+  try {
+    db = await openDatabase();
+    await refreshFiles();
+  } catch {
+    db = null;
+    notify("File storage is unavailable. Other workspace features still work.");
+  }
+
+  // Remove references to content that no longer exists.
+  const validBookmarks = new Set([
+    ...courses.map(item => `course:${item.id}`),
+    ...resources.map(item => `resource:${item.id}`),
+    ...jobs.map(item => `job:${item.id}`),
+    ...files.map(item => `file:${item.id}`)
+  ]);
+
+  state.bookmarks = state.bookmarks.filter(key =>
+    validBookmarks.has(key) || (!db && key.startsWith("file:"))
+  );
+
+  $("#login-button").disabled = false;
+  $("#login-button").textContent = "Log in";
+  render();
+}
+
+initialize();
+</script>
+</body>
+</html>
